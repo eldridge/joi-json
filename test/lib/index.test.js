@@ -276,5 +276,25 @@ describe( 'lib/index', function() {
             let result3 = joi.validate( 'forty-two', schema );
             expect( result3.error ).to.exist;
         });
+
+        it( 'default functions', function() {
+
+            let f = function() { return parser.parse( 'string:default=some_function(ok)' ) };
+
+            expect( f ).to.throw(Error, "unable to locate function with name: some_function" );
+
+            parser.registerFunction("some_function", val => ({ result: true, val }));
+
+            expect( f ).to.not.throw();
+
+            let schema = f();
+            let result1 = joi.validate( '3952469a-1b45-4d5e-825c-e25ec8b57cf6', schema );
+            expect( result1.error ).to.be.null;
+            expect( result1.value ).to.deep.equal('3952469a-1b45-4d5e-825c-e25ec8b57cf6');
+
+            let result2 = joi.validate( undefined, schema );
+            expect( result2.error ).to.be.null;
+            expect( result2.value ).to.deep.equal({ result: true, val: "ok" });
+        });
     });
 });
